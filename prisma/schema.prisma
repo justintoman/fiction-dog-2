@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Story {
+  slug           String    @id
+  title          String
+  author         User      @relation(fields: [authorId], references: [id])
+  authorId       Int
+  image          Image     @relation(name: "StoryImage", fields: [imageId], references: [id])
+  imageId        Int       @unique
+  firstChapterId Int?
+  chapters       Chapter[]
+}
+
+model Chapter {
+  id          Int      @id @default(autoincrement())
+  story       Story    @relation(fields: [storySlug], references: [slug])
+  storySlug   String
+  content     String
+  image       Image    @relation(name: "ChapterImage", fields: [imageId], references: [id])
+  imageId     Int      @unique
+  choices     Choice[] @relation("ChoicesFromChapter")
+  
+  choicesFrom Choice[] @relation("ChoicesToChapter") @ignore
+}
+
+model Choice {
+  id            Int     @id @default(autoincrement())
+  fromChapter   Chapter @relation(name: "ChoicesFromChapter", fields: [fromChapterId], references: [id], onDelete: Cascade)
+  fromChapterId Int
+  toChapter     Chapter @relation(name: "ChoicesToChapter", fields: [toChapterId], references: [id], onDelete: Cascade)
+  toChapterId   Int
+
+  @@unique([fromChapterId, toChapterId])
+}
+
+model User {
+  id      Int     @id @default(autoincrement())
+  email   String  @unique
+  name    String
+  stories Story[]
+  image   Image   @relation("UserImage", fields: [imageId], references: [id])
+  imageId Int     @unique
+}
+
+model Image {
+  id     Int   @id @default(autoincrement())
+  source Bytes
+  webp   Bytes
+  png    Bytes
+
+  chapter Chapter? @relation("ChapterImage") @ignore
+  story   Story?   @relation("StoryImage") @ignore
+  user    User?    @relation("UserImage") @ignore
+}

@@ -1,0 +1,53 @@
+{
+  "name": "fiction-dog-2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
+    "postinstall": "react-router typegen",
+    "format": "npx prettier . --check",
+    "format:fix": "npx prettier . --write",
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "@radix-ui/react-slot": "^1.1.2",
+    "@react-router/fs-routes": "^7.3.0",
+    "@react-router/node": "^7.3.0",
+    "@react-router/serve": "^7.3.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "envalid": "^8.0.0",
+    "isbot": "^5.1.17",
+    "ky": "^1.7.5",
+    "lucide-react": "^0.479.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.3.0",
+    "tailwind-merge": "^3.0.2",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@react-router/dev": "^7.3.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "prettier": "3.5.3",
+    "prisma": "^6.4.1",
+    "react-router-devtools": "^1.1.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.26.0",
+    "vite": "^5.4.11",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
