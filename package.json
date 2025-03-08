@@ -14,11 +14,16 @@
     "lint:fix": "npx eslint . --fix"
   },
   "dependencies": {
+    "@conform-to/react": "^1.2.2",
+    "@conform-to/zod": "^1.2.2",
+    "@epic-web/invariant": "^1.0.0",
     "@prisma/client": "^6.4.1",
+    "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@react-router/fs-routes": "^7.3.0",
     "@react-router/node": "^7.3.0",
     "@react-router/serve": "^7.3.0",
+    "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "envalid": "^8.0.0",
@@ -28,6 +33,10 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.3.0",
+    "remix-auth": "^4.1.0",
+    "remix-auth-form": "^3.0.0",
+    "remix-utils": "^8.1.1",
+    "slugify": "^1.6.6",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7"
   },

@@ -9,6 +9,14 @@ export default function Welcome() {
         <Button asChild>
           <Link to="/create">Create a Story</Link>
         </Button>
+
+        <Button asChild>
+          <Link to="/login">Login</Link>
+        </Button>
+
+        <Button asChild>
+          <Link to="/register">Register</Link>
+        </Button>
       </div>
     </main>
   );
