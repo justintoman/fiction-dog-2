@@ -1,4 +1,5 @@
 import {
+  Form,
   isRouteErrorResponse,
   Link,
   Links,
@@ -7,7 +8,6 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ThemeProvider } from "~/components/ThemeProvider";
@@ -15,6 +15,21 @@ import type { User } from "@prisma/client";
 import { getUserId } from "~/services/auth.server";
 import { prisma } from "~/services/prisma.server";
 import { Button } from "~/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "~/components/ui/drawer";
+import { Menu } from "lucide-react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -55,16 +70,16 @@ export async function loader({ request }: Route.LoaderArgs) {
       where: { id: userId },
     });
   }
-  console.log("root loader", { userId, user });
+
   return { user };
 }
 
 export default function App({ loaderData: { user } }: Route.ComponentProps) {
   return (
     <ThemeProvider>
-      <div className="h-full w-full flex flex-col">
+      <div className="flex h-full w-full flex-col">
         <NavBar user={user} />
-        <div className="flex-grow min-h-0">
+        <div className="min-h-0 flex-grow">
           <Outlet />
         </div>
       </div>
@@ -74,23 +89,89 @@ export default function App({ loaderData: { user } }: Route.ComponentProps) {
 
 function NavBar({ user }: { user: User | null }) {
   return (
-    <nav className="w-full p-4 border-b-1 border-gray-200">
+    <nav className="w-full border-b-1 border-gray-200 px-4 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <span className="text-lg font-bold">Fiction Dog 🐶🪄</span>
+          <span className="text-lg font-bold">
+            <Link to="/">🐶🪄 Fiction Dog</Link>
+          </span>
         </div>
         <div className="flex items-center">
           {user ? (
-            <div className="flex items-center">
-              <span className="text-sm font-medium">{user.name}</span>
-            </div>
+            <>
+              <div className="hidden space-x-2 sm:flex">
+                <Button variant="link" size="sm" asChild>
+                  <Link to="/create">Create a Story</Link>
+                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      {user.name}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-fit">
+                    <ul>
+                      <li>
+                        <Button variant="ghost" asChild>
+                          <Link to="/account">Account</Link>
+                        </Button>
+                      </li>
+                      <li>
+                        <Form method="post" action="/logout">
+                          <Button type="submit" variant="ghost">
+                            Logout
+                          </Button>
+                        </Form>
+                      </li>
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Drawer>
+                <DrawerTrigger className="flex sm:hidden">
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader className="flex justify-center text-center">
+                    <DrawerTitle>{user.name}</DrawerTitle>
+                    <div className="border-b-1 py-2" />
+                  </DrawerHeader>
+                  <DrawerClose asChild>
+                    <Button variant="link" size="sm" asChild>
+                      <Link to="/create">Create a Story</Link>
+                    </Button>
+                  </DrawerClose>
+
+                  <DrawerClose asChild>
+                    <Button variant="link" size="sm" asChild>
+                      <Link to="/account">Account</Link>
+                    </Button>
+                  </DrawerClose>
+                  <DrawerClose>
+                    <Form method="post" action="/logout">
+                      <Button type="submit" variant="ghost">
+                        Logout
+                      </Button>
+                    </Form>
+                  </DrawerClose>
+
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="link">Close</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            </>
           ) : (
-            <div className="flex items-center space-x-4">
-              <Button asChild variant="outline">
+            <div className="flex items-center">
+              <Button asChild variant="link" size="sm">
                 <Link to="/login">Login</Link>
               </Button>
 
-              <Button asChild variant="outline">
+              <Button asChild variant="link" size="sm">
                 <Link to="/register">Register</Link>
               </Button>
             </div>
@@ -118,11 +199,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
+    <main className="container mx-auto p-4 pt-16">
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="w-full overflow-x-auto p-4">
           <code>{stack}</code>
         </pre>
       )}

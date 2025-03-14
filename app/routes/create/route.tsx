@@ -17,7 +17,6 @@ import slugify from "slugify";
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUser(request);
   if (!user) {
-    console.log("/create loader, no user found", user);
     return redirect("/login");
   }
 }
@@ -25,7 +24,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   const user = await getUser(request);
   if (!user) {
-    console.log("/create action, no user found", user);
     return redirect("/login");
   }
 
@@ -83,17 +81,14 @@ export async function action({ request }: Route.ActionArgs) {
     },
   });
 
-  console.log("created a bunch of stuff");
-  console.log({ story, firstChapter, image });
-
   return redirect(`/create/${story.slug}/${firstChapter.id}`);
 }
 
 export default function CreateStory() {
   const [image, setImage] = useState<BingSearchValue | null>(null);
   return (
-    <main className="w-full h-full sm:max-w-3xl mx-auto flex flex-col">
-      <div className="flex justify-between px-4 py-2 items-center mb-4">
+    <main className="mx-auto flex h-full w-full flex-col sm:max-w-3xl">
+      <div className="mb-4 flex items-center justify-between px-4 py-2">
         <h1 className="font-bold">Create a Story</h1>
         <Button asChild variant="link">
           <Link to="/">
@@ -102,7 +97,7 @@ export default function CreateStory() {
           </Link>
         </Button>
       </div>
-      <Form className="flex justify-between px-4 py-2 space-x-4" method="post">
+      <Form className="flex justify-between space-x-4 px-4 py-2" method="post">
         <div className="space-y-2">
           <Label className="text-sm font-bold" htmlFor="title">
             Title
@@ -117,7 +112,7 @@ export default function CreateStory() {
         <input type="hidden" name="image" value={image?.contentUrl} />
         <Button>Create</Button>
       </Form>
-      <div className="flex-grow min-h-0">
+      <div className="min-h-0 flex-grow">
         <ImagePicker image={image?.thumbnailUrl} onChange={setImage} />
       </div>
     </main>

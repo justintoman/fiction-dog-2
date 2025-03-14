@@ -11,7 +11,6 @@ const client = ky.create({
 
 export const Bing = {
   async imageSearch(query: string): Promise<BingSearchResponse> {
-    console.log(`Bing Search for: ${query}`);
     const searchParams = new URLSearchParams({
       q: query,
       count: "8",

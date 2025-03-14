@@ -18,14 +18,13 @@ authenticator.use(
   new FormStrategy(async ({ form }) => {
     const email = form.get("email");
     const password = form.get("password");
-    console.log("auth form strategy", { email, password });
     invariant(typeof email === "string", "Email must be a string");
     invariant(typeof password === "string", "Password must be a string");
     const session = await login({ email, password });
     if (!session) {
       throw new Error("Unable to login");
     }
-    console.log("auth FormStrategy, login successful", { session });
+
     return session;
   }),
   "user-pass",

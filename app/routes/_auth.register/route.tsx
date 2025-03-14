@@ -26,7 +26,7 @@ export default function SignUpPage({ actionData }: Route.ComponentProps) {
   return (
     <Form
       method="post"
-      className="sm:mx-auto sm:max-w-lg w-full space-y-4 p-4"
+      className="w-full space-y-4 p-4 sm:mx-auto sm:max-w-lg"
       {...getFormProps(form)}
     >
       <div className="space-y-2">
@@ -69,7 +69,6 @@ export default function SignUpPage({ actionData }: Route.ComponentProps) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  console.log("signup attempted");
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema });
 
