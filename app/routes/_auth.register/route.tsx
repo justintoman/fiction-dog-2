@@ -12,25 +12,58 @@ import { Button } from "~/components/ui/button";
 export default function SignUpPage({ actionData }: Route.ComponentProps) {
   const [form, fields] = useForm({
     lastResult: actionData,
+    defaultValue: {
+      email: "justintoman@gmail.com",
+      name: "super pizza",
+      password: "1234qwer",
+      confirmPassword: "1234qwer",
+    },
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
     },
     constraint: getZodConstraint(schema),
   });
   return (
-    <Form method="post" {...getFormProps(form)}>
-      <Label htmlFor={fields.email.id}>Email</Label>
-      <Input {...getInputProps(fields.email, { type: "email" })} />
+    <Form
+      method="post"
+      className="sm:mx-auto sm:max-w-lg w-full space-y-4 p-4"
+      {...getFormProps(form)}
+    >
+      <div className="space-y-2">
+        <Label className="text-sm font-bold" htmlFor={fields.email.id}>
+          Email
+        </Label>
+        <Input {...getInputProps(fields.email, { type: "email" })} />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-bold" htmlFor={fields.name.id}>
+          Display Name
+        </Label>
+        <Input {...getInputProps(fields.name, { type: "text" })} />
+      </div>
 
-      <Label htmlFor={fields.name.id}>Display Name</Label>
-      <Input {...getInputProps(fields.name, { type: "text" })} />
+      <div className="space-y-2">
+        <Label className="text-sm font-bold" htmlFor={fields.password.id}>
+          Password
+        </Label>
+        <Input
+          {...getInputProps(fields.password, { type: "password" })}
+          autoComplete="new-password"
+        />
+      </div>
 
-      <Label htmlFor={fields.password.id}>Password</Label>
-      <Input
-        {...getInputProps(fields.password, { type: "password" })}
-        autoComplete="current-password"
-      />
-      <Button type="submit">Sign Up</Button>
+      <div className="space-y-2">
+        <Label className="text-sm font-bold" htmlFor={fields.password.id}>
+          Confirm Password
+        </Label>
+        <Input
+          {...getInputProps(fields.confirmPassword, { type: "password" })}
+          autoComplete="new-password"
+        />
+      </div>
+      <div className="flex justify-end">
+        <Button type="submit">Sign Up</Button>
+      </div>
     </Form>
   );
 }
@@ -66,13 +99,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     request.headers.get("cookie"),
   );
   const user = session.get("user");
-  if (user) throw redirect("/dashboard");
+  if (user) throw redirect("/");
   return data(null);
 }
 
 const schema = z
   .object({
-    email: z.string().email(),
+    email: z.string().email().min(1),
     name: z.string().min(1),
     password: z.string().min(8),
     confirmPassword: z.string(),

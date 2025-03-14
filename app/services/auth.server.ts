@@ -1,5 +1,5 @@
 import { invariant } from "@epic-web/invariant";
-import type { Password, User } from "@prisma/client";
+import type { Password, User, Session } from "@prisma/client";
 import { redirect } from "react-router";
 import bcrypt from "bcryptjs";
 import { Authenticator } from "remix-auth";
@@ -18,14 +18,15 @@ authenticator.use(
   new FormStrategy(async ({ form }) => {
     const email = form.get("email");
     const password = form.get("password");
-    console.log({ email, password });
+    console.log("auth form strategy", { email, password });
     invariant(typeof email === "string", "Email must be a string");
     invariant(typeof password === "string", "Password must be a string");
-    const user = await login({ email, password });
-    if (!user) {
+    const session = await login({ email, password });
+    if (!session) {
       throw new Error("Unable to login");
     }
-    return user;
+    console.log("auth FormStrategy, login successful", { session });
+    return session;
   }),
   "user-pass",
 );
@@ -55,11 +56,11 @@ export async function getUserId(request: Request) {
   const authSession = await authSessionStorage.getSession(
     request.headers.get("cookie"),
   );
-  const sessionId = authSession.get(sessionKey);
-  if (!sessionId) return null;
+  const sessionPartial = authSession.get(sessionKey) as Session | null;
+  if (!sessionPartial) return null;
   const session = await prisma.session.findUnique({
     select: { user: { select: { id: true } } },
-    where: { id: sessionId, expirationDate: { gt: new Date() } },
+    where: { id: sessionPartial.id, expirationDate: { gt: new Date() } },
   });
   if (!session?.user) {
     throw redirect("/", {
@@ -69,6 +70,17 @@ export async function getUserId(request: Request) {
     });
   }
   return session.user.id;
+}
+
+export async function getUser(request: Request) {
+  const userId = await getUserId(request);
+  let user: User | null = null;
+  if (userId) {
+    user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
+  return user;
 }
 
 export async function requireUserId(

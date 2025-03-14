@@ -6,6 +6,7 @@ import { Input } from "~/components/ui/input";
 import type { BingSearchValue } from "~/types";
 import { useState } from "react";
 import { ArrowLeft, Image, Search } from "lucide-react";
+import { ScrollArea } from "~/components/ui/scroll-area";
 
 export function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -50,7 +51,7 @@ export function ImagePicker({ image, onChange }: ImageSearchProps) {
         </fetcher.Form>
 
         {fetcher.data && (
-          <div className="flex-grow overflow-y-auto">
+          <ScrollArea className="flex-grow overflow-y-auto">
             <ul className="flex flex-wrap">
               {fetcher.data.value.map((image) => (
                 <li
@@ -65,7 +66,7 @@ export function ImagePicker({ image, onChange }: ImageSearchProps) {
                 </li>
               ))}
             </ul>
-          </div>
+          </ScrollArea>
         )}
       </div>
     );
@@ -74,16 +75,16 @@ export function ImagePicker({ image, onChange }: ImageSearchProps) {
   return (
     <div
       data-has-image={Boolean(image)}
-      className="w-full sm:w-xl h-72 sm:h-96 mx-auto rounded-md data-[has-image=false]:border-2 border-dashed border-muted-foreground grid grid-cols-1 grid-rows-1 cursor-pointer hover:bg-primary/5 group"
+      className="w-full sm:w-xl h-72 sm:h-96 mx-auto rounded-md data-[has-image=false]:border-2 border-dashed border-muted-foreground grid grid-cols-1 grid-rows-1 group"
     >
       <picture className="row-1 col-1 flex items-center justify-center h-full w-full">
         <img
           src={image}
-          className="h-full w-full group-data-[has-image=false]:hidden"
+          className="max-h-full max-w-full group-data-[has-image=false]:hidden"
         />
         <source
           srcSet={image}
-          className="h-full w-full group-data-[has-image=false]:hidden"
+          className="max-h-full max-w-full group-data-[has-image=false]:hidden"
         />
         <span className="group-data-[has-image=true]:hidden text-sm italic text-center text-muted-foreground">
           <Image />
@@ -91,7 +92,7 @@ export function ImagePicker({ image, onChange }: ImageSearchProps) {
       </picture>
       <div className="row-1 col-1 flex items-end justify-end p-2">
         <Button variant="outline" onClick={() => setIsEditing(true)}>
-          Edit
+          Pick a new photo
           <Search />
         </Button>
       </div>

@@ -1,5 +1,6 @@
 import {
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
@@ -10,6 +11,10 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ThemeProvider } from "~/components/ThemeProvider";
+import type { User } from "@prisma/client";
+import { getUserId } from "~/services/auth.server";
+import { prisma } from "~/services/prisma.server";
+import { Button } from "~/components/ui/button";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,11 +47,57 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const userId = await getUserId(request);
+  let user: User | null = null;
+  if (userId) {
+    user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
+  console.log("root loader", { userId, user });
+  return { user };
+}
+
+export default function App({ loaderData: { user } }: Route.ComponentProps) {
   return (
     <ThemeProvider>
-      <Outlet />
+      <div className="h-full w-full flex flex-col">
+        <NavBar user={user} />
+        <div className="flex-grow min-h-0">
+          <Outlet />
+        </div>
+      </div>
     </ThemeProvider>
+  );
+}
+
+function NavBar({ user }: { user: User | null }) {
+  return (
+    <nav className="w-full p-4 border-b-1 border-gray-200">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <span className="text-lg font-bold">Fiction Dog 🐶🪄</span>
+        </div>
+        <div className="flex items-center">
+          {user ? (
+            <div className="flex items-center">
+              <span className="text-sm font-medium">{user.name}</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <Button asChild variant="outline">
+                <Link to="/login">Login</Link>
+              </Button>
+
+              <Button asChild variant="outline">
+                <Link to="/register">Register</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
   );
 }
 

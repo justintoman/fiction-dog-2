@@ -1,5 +1,5 @@
 import { data, Form, redirect } from "react-router";
-import { authenticator } from "~/services/auth.server";
+import { authenticator, sessionKey } from "~/services/auth.server";
 import type { Route } from "./+types/route";
 import { getFormProps, useForm, getInputProps } from "@conform-to/react";
 import { authSessionStorage } from "~/services/session.server";
@@ -37,12 +37,12 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 export async function action({ request }: Route.ActionArgs) {
   // we call the method with the name of the strategy we want to use and the
   // request object
-  const user = await authenticator.authenticate("user-pass", request);
+  const userSession = await authenticator.authenticate("user-pass", request);
 
   const session = await authSessionStorage.getSession(
     request.headers.get("cookie"),
   );
-  session.set("user", user);
+  session.set(sessionKey, userSession);
 
   throw redirect("/", {
     headers: { "Set-Cookie": await authSessionStorage.commitSession(session) },
@@ -55,8 +55,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   const session = await authSessionStorage.getSession(
     request.headers.get("cookie"),
   );
-  const user = session.get("user");
-  if (user) throw redirect("/dashboard");
+  const user = session.get(sessionKey);
+  if (user) {
+    console.log("login loader", { user });
+    throw redirect("/");
+  }
   return data(null);
 }
 
