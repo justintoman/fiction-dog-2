@@ -128,7 +128,7 @@ function NavBar({ user }: { user: User | null }) {
                 </Popover>
               </div>
               <Drawer>
-                <DrawerTrigger className="flex sm:hidden">
+                <DrawerTrigger className="flex sm:hidden" asChild>
                   <Button variant="outline" size="icon">
                     <Menu className="h-4 w-4" />
                   </Button>
