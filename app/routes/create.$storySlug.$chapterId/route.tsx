@@ -1,7 +1,7 @@
-import { getUser } from "~/services/auth.server";
-import type { Route } from "./+types/route";
 import { redirect } from "react-router";
+import { getUser } from "~/services/auth.server";
 import { prisma } from "~/services/prisma.server";
+import type { Route } from "./+types/route";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getUser(request);

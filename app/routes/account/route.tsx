@@ -1,6 +1,6 @@
-import type { Route } from "./+types/route";
 import { redirect } from "react-router";
 import { getUser } from "~/services/auth.server";
+import type { Route } from "./+types/route";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUser(request);

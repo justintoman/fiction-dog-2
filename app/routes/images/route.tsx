@@ -1,12 +1,12 @@
-import { Bing } from "~/api/bing";
-import type { Route } from "./+types/route";
+import { ArrowLeft, Image, Search } from "lucide-react";
+import { useState } from "react";
 import { useFetcher } from "react-router";
+import { Bing } from "~/api/bing";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import type { BingSearchValue } from "~/types";
-import { useState } from "react";
-import { ArrowLeft, Image, Search } from "lucide-react";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import type { BingSearchValue } from "~/types";
+import type { Route } from "./+types/route";
 
 export function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);

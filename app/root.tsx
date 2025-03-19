@@ -1,3 +1,5 @@
+import type { User } from "@prisma/client";
+import { Menu } from "lucide-react";
 import {
   Form,
   isRouteErrorResponse,
@@ -8,18 +10,8 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import type { Route } from "./+types/root";
-import "./app.css";
 import { ThemeProvider } from "~/components/ThemeProvider";
-import type { User } from "@prisma/client";
-import { getUserId } from "~/services/auth.server";
-import { prisma } from "~/services/prisma.server";
 import { Button } from "~/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import {
   Drawer,
   DrawerClose,
@@ -29,7 +21,15 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/components/ui/drawer";
-import { Menu } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { getUserId } from "~/services/auth.server";
+import { prisma } from "~/services/prisma.server";
+import type { Route } from "./+types/root";
+import "./app.css";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

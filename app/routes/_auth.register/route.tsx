@@ -1,13 +1,13 @@
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { data, Form, redirect } from "react-router";
-import { sessionKey, signup } from "~/services/auth.server";
-import type { Route } from "./+types/route";
-import { getFormProps, useForm, getInputProps } from "@conform-to/react";
-import { authSessionStorage } from "~/services/session.server";
-import { Input } from "~/components/ui/input";
-import { parseWithZod, getZodConstraint } from "@conform-to/zod";
 import { z } from "zod";
-import { Label } from "~/components/ui/label";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { sessionKey, signup } from "~/services/auth.server";
+import { authSessionStorage } from "~/services/session.server";
+import type { Route } from "./+types/route";
 
 export default function SignUpPage({ actionData }: Route.ComponentProps) {
   const [form, fields] = useForm({

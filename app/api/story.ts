@@ -1,4 +1,3 @@
-import type { Story as StoryType } from "@prisma/client";
 import { prisma } from "~/services/prisma.server";
 
 export const Story = Object.freeze({
