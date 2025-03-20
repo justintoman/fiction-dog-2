@@ -11,6 +11,10 @@ import type { Route } from "./+types/route";
 
 export default function LoginPage({ actionData }: Route.ComponentProps) {
   const [form, fields] = useForm({
+    defaultValue: {
+      email: "superpizza@email.com",
+      password: "1234qwer",
+    },
     lastResult: actionData,
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
@@ -18,16 +22,25 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
     constraint: getZodConstraint(schema),
   });
   return (
-    <Form method="post" {...getFormProps(form)}>
-      <Label htmlFor={fields.email.id}>Email</Label>
-      <Input {...getInputProps(fields.email, { type: "email" })} />
-
-      <Label htmlFor={fields.password.id}>Password</Label>
-      <Input
-        {...getInputProps(fields.password, { type: "password" })}
-        autoComplete="current-password"
-      />
-      <Button>Sign In</Button>
+    <Form method="post" {...getFormProps(form)} className="w-full space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-bold" htmlFor={fields.email.id}>
+          Email
+        </Label>
+        <Input {...getInputProps(fields.email, { type: "email" })} />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-bold" htmlFor={fields.password.id}>
+          Password
+        </Label>
+        <Input
+          {...getInputProps(fields.password, { type: "password" })}
+          autoComplete="current-password"
+        />
+      </div>
+      <div className="flex justify-end">
+        <Button>Sign In</Button>
+      </div>
     </Form>
   );
 }

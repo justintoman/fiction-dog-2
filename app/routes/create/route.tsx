@@ -4,13 +4,12 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Form, Link, redirect } from "react-router";
 import sharp from "sharp";
-import slugify from "slugify";
+import { Db } from "~/api/db";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ImagePicker } from "~/routes/images/route";
 import { getUser } from "~/services/auth.server";
-import { prisma } from "~/services/prisma.server";
 import type { BingSearchValue } from "~/types";
 import type { Route } from "./+types/route";
 
@@ -42,46 +41,19 @@ export async function action({ request }: Route.ActionArgs) {
     width: 800,
     height: 450,
   });
-  const image = await prisma.image.create({
-    data: {
-      source: await imageSource.toBuffer(),
-      webp: await imageSource.webp().toBuffer(),
-      png: await imageSource.png().toBuffer(),
-    },
+  const image = await Db.Image.create({
+    source: await imageSource.toBuffer(),
+    webp: await imageSource.webp().toBuffer(),
+    png: await imageSource.png().toBuffer(),
   });
 
-  const slug = slugify(title.substring(0, 50), {
-    lower: true,
-    strict: true,
+  const story = await Db.Story.create({
+    title,
+    authorId: user.id,
+    imageId: image.id,
   });
 
-  const story = await prisma.story.create({
-    data: {
-      slug,
-      title,
-      authorId: user.id,
-      imageId: image.id,
-    },
-  });
-
-  const firstChapter = await prisma.chapter.create({
-    data: {
-      storySlug: story.slug,
-      content: "",
-      imageId: image.id,
-    },
-  });
-
-  await prisma.story.update({
-    where: {
-      slug: story.slug,
-    },
-    data: {
-      firstChapterId: firstChapter.id,
-    },
-  });
-
-  return redirect(`/create/${story.slug}/${firstChapter.id}`);
+  return redirect(`/create/${story.slug}/${story.firstChapterId}`);
 }
 
 export default function CreateStory() {

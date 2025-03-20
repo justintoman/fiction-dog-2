@@ -13,8 +13,8 @@ export default function SignUpPage({ actionData }: Route.ComponentProps) {
   const [form, fields] = useForm({
     lastResult: actionData,
     defaultValue: {
-      email: "justintoman@gmail.com",
-      name: "super pizza",
+      email: "superpizza@email.com",
+      name: "SuperPizza",
       password: "1234qwer",
       confirmPassword: "1234qwer",
     },
@@ -24,11 +24,7 @@ export default function SignUpPage({ actionData }: Route.ComponentProps) {
     constraint: getZodConstraint(schema),
   });
   return (
-    <Form
-      method="post"
-      className="w-full space-y-4 p-4 sm:mx-auto sm:max-w-lg"
-      {...getFormProps(form)}
-    >
+    <Form method="post" className="w-full space-y-4" {...getFormProps(form)}>
       <div className="space-y-2">
         <Label className="text-sm font-bold" htmlFor={fields.email.id}>
           Email

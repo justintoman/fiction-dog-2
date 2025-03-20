@@ -36,12 +36,14 @@ model Chapter {
 
 model Choice {
   id            String  @id @default(cuid())
-  fromChapter   Chapter @relation(name: "ChoicesFromChapter", fields: [fromChapterId], references: [id], onDelete: Cascade)
-  fromChapterId String
-  toChapter     Chapter @relation(name: "ChoicesToChapter", fields: [toChapterId], references: [id], onDelete: Cascade)
-  toChapterId   String
+  content       String
 
-  @@unique([fromChapterId, toChapterId])
+  chapter   Chapter @relation(name: "ChoicesFromChapter", fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId String
+  toChapter     Chapter? @relation(name: "ChoicesToChapter", fields: [toChapterId], references: [id], onDelete: Cascade)
+  toChapterId   String?
+
+  @@unique([chapterId, toChapterId])
 }
 
 model Image {
