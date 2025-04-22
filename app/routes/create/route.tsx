@@ -18,6 +18,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (!user) {
     return redirect("/login");
   }
+  return null;
 }
 
 export async function action({ request }: Route.ActionArgs) {
