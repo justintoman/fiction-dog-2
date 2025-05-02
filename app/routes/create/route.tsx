@@ -1,16 +1,17 @@
-import { invariant } from "@epic-web/invariant";
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import ky from "ky";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
-import { Form, Link, redirect } from "react-router";
+import { data, Form, Link, redirect } from "react-router";
 import sharp from "sharp";
+import { z } from "zod";
 import { Db } from "~/api/db";
+import { ErrorList } from "~/components/ErrorsList";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ImagePicker } from "~/routes/images/route";
 import { getUser } from "~/services/auth.server";
-import type { BingSearchValue } from "~/types";
 import type { Route } from "./+types/route";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -28,14 +29,13 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const formData = await request.formData();
+  const submission = parseWithZod(formData, { schema });
 
-  const title = formData.get("title");
-  invariant(title, "Title is required");
-  invariant(typeof title === "string", "Title must be a string");
+  if (submission.status !== "success") {
+    return data(submission.reply(), { status: 400 });
+  }
 
-  const imageUrl = formData.get("image");
-  invariant(imageUrl, "Image is required");
-  invariant(typeof imageUrl === "string", "Image must be a string");
+  const { title, imageUrl } = submission.value;
 
   const imageBlob = await ky.get(imageUrl).blob();
   const imageSource = sharp(await imageBlob.arrayBuffer()).resize({
@@ -57,8 +57,18 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(`/create/${story.slug}/${story.firstChapterId}`);
 }
 
-export default function CreateStory() {
-  const [image, setImage] = useState<BingSearchValue | null>(null);
+export default function CreateStory({ actionData }: Route.ComponentProps) {
+  const [form, fields] = useForm({
+    defaultValue: {
+      title: "",
+      imageUrl: "",
+    },
+    lastResult: actionData,
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema });
+    },
+    constraint: getZodConstraint(schema),
+  });
   return (
     <main className="mx-auto flex h-full w-full flex-col sm:max-w-3xl">
       <div className="mb-4 flex items-center justify-between px-4 py-2">
@@ -70,24 +80,35 @@ export default function CreateStory() {
           </Link>
         </Button>
       </div>
-      <Form className="flex justify-between space-x-4 px-4 py-2" method="post">
+      <Form
+        className="flex justify-between space-x-4 px-4 py-2"
+        method="post"
+        {...getFormProps(form)}
+      >
         <div className="space-y-2">
-          <Label className="text-sm font-bold" htmlFor="title">
+          <Label className="text-sm font-bold" htmlFor={fields.title.id}>
             Title
           </Label>
           <Input
-            type="text"
+            {...getInputProps(fields.title, { type: "text" })}
             placeholder="Title"
-            id="title"
             className="w-full"
           />
+          <ErrorList id={fields.title.errorId} errors={fields.title.errors} />
         </div>
-        <input type="hidden" name="image" value={image?.contentUrl} />
         <Button>Create</Button>
       </Form>
       <div className="min-h-0 flex-grow">
-        <ImagePicker image={image?.thumbnailUrl} onChange={setImage} />
+        <ImagePicker config={fields.imageUrl} />
       </div>
     </main>
   );
 }
+
+const schema = z.object({
+  title: z
+    .string()
+    .min(10, "Title must be at least 10 characters long")
+    .max(100),
+  imageUrl: z.string().min(1, "Image is required").url(),
+});

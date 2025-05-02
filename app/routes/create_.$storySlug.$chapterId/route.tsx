@@ -1,4 +1,5 @@
 import { redirect } from "react-router";
+import { Image } from "~/routes/image.$id.$type/route";
 import { getUser } from "~/services/auth.server";
 import { prisma } from "~/services/prisma.server";
 import type { Route } from "./+types/route";
@@ -32,11 +33,7 @@ export default function StoryEditor({
       <h1>Edit Story</h1>
       <div>{story.title}</div>
       <div>
-        <picture>
-          <source srcSet={`image/${story.imageId}/webp`} type="img/webp" />
-          <source srcSet={`image/${story.imageId}/png`} type="img/png" />
-          <source srcSet={`image/${story.imageId}/source`} />
-        </picture>
+        <Image imageId={story.imageId} />
       </div>
     </div>
   );

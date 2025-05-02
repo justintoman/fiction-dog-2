@@ -1,4 +1,5 @@
 import { invariant } from "@epic-web/invariant";
+import type { ComponentProps } from "react";
 import { prisma } from "~/services/prisma.server";
 import type { Route } from "./+types/route";
 
@@ -19,12 +20,34 @@ export async function loader({ params: { type, id } }: Route.LoaderArgs) {
       id,
     },
   });
+  function response(body: BodyInit) {
+    return new Response(body, {
+      headers: {
+        "Content-Type": `image/${type}`,
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    });
+  }
   switch (type) {
     case "source":
-      return image.source;
+      return response(image.source);
     case "webp":
-      return image.webp;
+      return response(image.webp);
     case "png":
-      return image.png;
+      return response(image.png);
   }
+}
+
+export type ImageProps = ComponentProps<"picture"> & {
+  imageId: string;
+};
+
+export function Image({ imageId, ...props }: ImageProps) {
+  return (
+    <picture {...props}>
+      <source srcSet={`/image/${imageId}/webp`} />
+      <source srcSet={`/image/${imageId}/png`} />
+      <img src={`/image/${imageId}/source`} />
+    </picture>
+  );
 }
