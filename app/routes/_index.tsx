@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Db } from "~/api/db";
+import { Db } from "~/api/db.server";
 import { getUserId } from "~/services/auth.server";
 import type { Route } from "./+types/_index";
 import { Image } from "./image.$id.$type/route";

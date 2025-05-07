@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { data, Form, Link, redirect } from "react-router";
 import sharp from "sharp";
 import { z } from "zod";
-import { Db } from "~/api/db";
+import { Db } from "~/api/db.server";
 import { ErrorList } from "~/components/ErrorsList";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -112,3 +112,9 @@ const schema = z.object({
     .max(100),
   imageUrl: z.string().min(1, "Image is required").url(),
 });
+
+export const meta: Route.MetaFunction = () => [
+  {
+    title: "Create a Story | Fiction Dog",
+  },
+];
