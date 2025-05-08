@@ -2,13 +2,14 @@ import { parseWithZod } from "@conform-to/zod";
 import { data, isRouteErrorResponse } from "react-router";
 import { Db } from "~/api/db.server";
 import { verifyStoryForEditing } from "~/lib/story-utils";
+import { ChapterImagePicker } from "~/routes/create_.$storySlug.$chapterId/ChapterImagePicker";
 import { StoryEditorSchema } from "~/routes/create_.$storySlug.$chapterId/schemas";
 import { StoryTitleEditor } from "~/routes/create_.$storySlug.$chapterId/TitleEditor";
 import { Image } from "~/routes/image.$id.$type/route";
 import type { Route } from "./+types/route";
 
 export default function StoryEditor({
-  loaderData: { story },
+  loaderData: { story, chapter },
 }: Route.ComponentProps) {
   return (
     <div>
@@ -18,7 +19,9 @@ export default function StoryEditor({
           <StoryTitleEditor title={story.title} />
         </div>
       </div>
-      <div></div>
+      <div>
+        <ChapterImagePicker imageId={chapter.imageId} />
+      </div>
     </div>
   );
 }
