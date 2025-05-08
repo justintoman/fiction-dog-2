@@ -1,4 +1,5 @@
 import type { User } from "@prisma/client";
+import clsx from "clsx";
 import {
   isRouteErrorResponse,
   Links,
@@ -7,7 +8,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { ThemeProvider } from "~/components/ThemeProvider";
+import { ClientHintCheck, getHints } from "~/lib/client-hints";
+import { useNonce } from "~/lib/nonce-provider";
+import { useTheme } from "~/lib/theme";
+import { getTheme } from "~/lib/theme.server";
 import { NavBar } from "~/NavBar";
 import { getUserId } from "~/services/auth.server";
 import { prisma } from "~/services/prisma.server";
@@ -27,10 +31,29 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export const meta: Route.MetaFunction = ({ data }) => [
+  {
+    title: "Fiction Dog",
+  },
+  {
+    name: "description",
+    content: "Fiction Dog is a tool for creating and sharing stories.",
+  },
+  {
+    "theme-color":
+      data.requestInfo.theme === "dark"
+        ? "oklch(0.141 0.005 285.823)"
+        : "oklch(1 0 0)",
+  },
+];
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const nonce = useNonce();
+  const theme = useTheme();
   return (
-    <html lang="en" className="bg-background h-full w-full">
+    <html lang="en" className={clsx(theme, "bg-background h-full w-full")}>
       <head>
+        <ClientHintCheck nonce={nonce} />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
@@ -54,19 +77,23 @@ export async function loader({ request }: Route.LoaderArgs) {
     });
   }
 
-  return { user };
+  return {
+    user,
+    requestInfo: {
+      theme: getTheme(request),
+      hints: getHints(request),
+    },
+  };
 }
 
 export default function App({ loaderData: { user } }: Route.ComponentProps) {
   return (
-    <ThemeProvider>
-      <div className="flex h-full w-full flex-col">
-        <NavBar user={user} />
-        <div className="min-h-0 flex-grow">
-          <Outlet />
-        </div>
+    <div className="flex h-full w-full flex-col">
+      <NavBar user={user} />
+      <div className="min-h-0 flex-grow">
+        <Outlet />
       </div>
-    </ThemeProvider>
+    </div>
   );
 }
 

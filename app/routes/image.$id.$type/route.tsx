@@ -1,5 +1,6 @@
 import { invariant } from "@epic-web/invariant";
 import type { ComponentProps } from "react";
+import { cn } from "~/lib/utils";
 import { prisma } from "~/services/prisma.server";
 import type { Route } from "./+types/route";
 
@@ -42,12 +43,16 @@ export type ImageProps = ComponentProps<"picture"> & {
   imageId: string;
 };
 
-export function Image({ imageId, ...props }: ImageProps) {
+export function Image({ imageId, className, ...props }: ImageProps) {
   return (
-    <picture {...props}>
-      <source srcSet={`/image/${imageId}/webp`} />
-      <source srcSet={`/image/${imageId}/png`} />
-      <img src={`/image/${imageId}/source`} />
+    <picture className={cn("block h-full w-full", className)} {...props}>
+      <source srcSet={`/image/${imageId}/webp`} type="image/webp" />
+      <source srcSet={`/image/${imageId}/png`} type="image/png" />
+      <img
+        src={`/image/${imageId}/source`}
+        className={cn("h-full w-full object-cover object-center", className)}
+        alt=""
+      />
     </picture>
   );
 }

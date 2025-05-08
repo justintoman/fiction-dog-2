@@ -14,6 +14,10 @@ export const Chapter = Object.freeze({
     });
   },
 
+  get(id: string) {
+    return prisma.chapter.findUnique({ where: { id } });
+  },
+
   update(id: string, data: UpdateChapterArgs) {
     return prisma.chapter.update({ where: { id }, data });
   },

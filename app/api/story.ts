@@ -28,7 +28,7 @@ export const Story = Object.freeze({
   },
 
   get(slug: string) {
-    const story = prisma.story.findUniqueOrThrow({
+    const story = prisma.story.findUnique({
       where: {
         slug,
       },
