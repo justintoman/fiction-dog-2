@@ -13,6 +13,14 @@ export const Choice = Object.freeze({
     });
   },
 
+  get(chapterId: string) {
+    return prisma.choice.findMany({
+      where: {
+        chapterId,
+      },
+    });
+  },
+
   update(id: string, data: UpdateChoiceArgs) {
     return prisma.choice.update({
       where: { id },

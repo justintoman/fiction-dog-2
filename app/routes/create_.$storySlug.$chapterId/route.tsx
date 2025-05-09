@@ -2,6 +2,8 @@ import { parseWithZod } from "@conform-to/zod";
 import { data, isRouteErrorResponse } from "react-router";
 import { Db } from "~/api/db.server";
 import { verifyStoryForEditing } from "~/lib/story-utils";
+import { ChapterChoiceEditor } from "~/routes/create_.$storySlug.$chapterId/ChapterChoiceEditor";
+import { ChapterContentEditor } from "~/routes/create_.$storySlug.$chapterId/ChapterContentEditor";
 import { ChapterImagePicker } from "~/routes/create_.$storySlug.$chapterId/ChapterImagePicker";
 import { StoryEditorSchema } from "~/routes/create_.$storySlug.$chapterId/schemas";
 import { StoryTitleEditor } from "~/routes/create_.$storySlug.$chapterId/TitleEditor";
@@ -9,18 +11,27 @@ import { Image } from "~/routes/image.$id.$type/route";
 import type { Route } from "./+types/route";
 
 export default function StoryEditor({
-  loaderData: { story, chapter },
+  loaderData: { story, chapter, choices },
 }: Route.ComponentProps) {
   return (
     <div>
-      <div className="flex items-center gap-4">
-        <Image imageId={story.imageId} className="h-32 w-48" />
+      <div className="flex min-h-0 items-start">
+        <Image
+          imageId={story.imageId}
+          className="h-24 max-w-30 sm:h-32 sm:w-48"
+        />
         <div>
           <StoryTitleEditor title={story.title} />
         </div>
       </div>
       <div>
         <ChapterImagePicker imageId={chapter.imageId} />
+      </div>
+      <div>
+        <ChapterContentEditor description={chapter.content} />
+      </div>
+      <div>
+        <ChapterChoiceEditor choices={choices} />
       </div>
     </div>
   );
@@ -33,7 +44,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     params.chapterId,
   );
 
-  return { story, chapter };
+  const choices = await Db.Choice.get(chapter.id);
+
+  return { story, chapter, choices };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -45,6 +58,8 @@ export async function action({ request, params }: Route.ActionArgs) {
   const submission = parseWithZod(formData, {
     schema: StoryEditorSchema,
   });
+
+  console.log("submission", submission);
 
   if (submission.status !== "success") {
     return data(submission.reply(), { status: 400 });
