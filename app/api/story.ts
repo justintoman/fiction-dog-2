@@ -1,6 +1,6 @@
-import type { Story as StoryType } from "@prisma/client";
 import slugify from "slugify";
 import { Chapter } from "~/api/chapter";
+import type { Story as StoryType } from "~/generated/prisma";
 import { prisma } from "~/services/prisma.server";
 
 type CreateStoryArgs = Pick<StoryType, "authorId" | "imageId" | "title">;

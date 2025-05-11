@@ -1,4 +1,4 @@
-import type { Chapter as ChapterType } from "@prisma/client";
+import type { Chapter as ChapterType } from "~/generated/prisma";
 import { prisma } from "~/services/prisma.server";
 
 type CreateChapterArgs = Pick<ChapterType, "storySlug" | "imageId">;

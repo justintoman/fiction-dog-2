@@ -1,4 +1,3 @@
-import type { User } from "@prisma/client";
 import clsx from "clsx";
 import {
   isRouteErrorResponse,
@@ -8,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import type { User } from "~/generated/prisma";
 import { ClientHintCheck, getHints } from "~/lib/client-hints";
 import { useNonce } from "~/lib/nonce-provider";
 import { useTheme } from "~/lib/theme";

@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { Db } from "~/api/db.server";
 import { getUserId } from "~/services/auth.server";
 import type { Route } from "./+types/_index";
-import { Image } from "./image.$id.$type/route";
+import { Image } from "./image.$id.$format.$size/route";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const userId = await getUserId(request);

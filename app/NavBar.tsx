@@ -1,4 +1,3 @@
-import type { User } from "@prisma/client";
 import clsx from "clsx";
 import { LaptopIcon, Menu, MoonIcon, SunIcon, X } from "lucide-react";
 import { Form, Link, useFetcher } from "react-router";
@@ -18,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import type { User } from "~/generated/prisma";
 import { useRequestInfo } from "~/lib/request-info";
 import { THEME_FETCHER_KEY, useOptimisticThemeMode } from "~/lib/theme";
 

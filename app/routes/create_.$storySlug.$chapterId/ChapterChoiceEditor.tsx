@@ -40,13 +40,21 @@ export function ChapterChoiceEditor({ choices }: { choices: Choice[] }) {
                 name: fields.choices.name,
                 index,
               })}
+              name="intent"
+              value="remove-choice"
+              type="submit"
             >
               Remove Choice
             </Button>
           </div>
         );
       })}
-      <Button {...form.insert.getButtonProps({ name: fields.choices.name })}>
+      <Button
+        {...form.insert.getButtonProps({ name: fields.choices.name })}
+        name="intent"
+        value="add-choice"
+        type="submit"
+      >
         Add Choice
       </Button>
     </fetcher.Form>

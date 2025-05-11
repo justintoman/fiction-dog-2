@@ -17,12 +17,17 @@ export const ChapterDescriptionSchema = z.object({
 
 export const ChoiceSchema = z.object({
   intent: z.literal("chapter-choice"),
-  choices: z.array(
-    z.object({
-      content: z.string().min(1),
-      destination: z.string().optional(),
-    }),
-  ),
+  content: z.string(),
+  destination: z.string().optional(),
+});
+
+export const AddChoiceSchema = z.object({
+  intent: z.literal("add-choice"),
+});
+
+export const RemoveChoiceSchema = z.object({
+  intent: z.literal("remove-choice"),
+  id: z.string(),
 });
 
 export const StoryEditorSchema = z.discriminatedUnion("intent", [
@@ -30,4 +35,6 @@ export const StoryEditorSchema = z.discriminatedUnion("intent", [
   ChapterImageSchema,
   ChapterDescriptionSchema,
   ChoiceSchema,
+  AddChoiceSchema,
+  RemoveChoiceSchema,
 ]);

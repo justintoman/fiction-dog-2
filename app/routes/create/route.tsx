@@ -3,7 +3,6 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import ky from "ky";
 import { ArrowLeft } from "lucide-react";
 import { data, Form, Link, redirect } from "react-router";
-import sharp from "sharp";
 import { z } from "zod";
 import { Db } from "~/api/db.server";
 import { ErrorList } from "~/components/ErrorsList";
@@ -38,15 +37,7 @@ export async function action({ request }: Route.ActionArgs) {
   const { title, imageUrl } = submission.value;
 
   const imageBlob = await ky.get(imageUrl).blob();
-  const imageSource = sharp(await imageBlob.arrayBuffer()).resize({
-    width: 800,
-    height: 450,
-  });
-  const image = await Db.Image.create({
-    source: await imageSource.toBuffer(),
-    webp: await imageSource.webp().toBuffer(),
-    png: await imageSource.png().toBuffer(),
-  });
+  const image = await Db.Image.create(imageBlob);
 
   const story = await Db.Story.create({
     title,

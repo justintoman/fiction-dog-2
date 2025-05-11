@@ -7,7 +7,7 @@ import { ChapterContentEditor } from "~/routes/create_.$storySlug.$chapterId/Cha
 import { ChapterImagePicker } from "~/routes/create_.$storySlug.$chapterId/ChapterImagePicker";
 import { StoryEditorSchema } from "~/routes/create_.$storySlug.$chapterId/schemas";
 import { StoryTitleEditor } from "~/routes/create_.$storySlug.$chapterId/TitleEditor";
-import { Image } from "~/routes/image.$id.$type/route";
+import { Image } from "~/routes/image.$id.$format.$size/route";
 import type { Route } from "./+types/route";
 
 export default function StoryEditor({
@@ -70,6 +70,28 @@ export async function action({ request, params }: Route.ActionArgs) {
       await Db.Story.update(params.storySlug, {
         title: submission.value.title,
       });
+      return submission.reply();
+    case "chapter-image":
+      await Db.Chapter.update(params.chapterId, {
+        imageId: submission.value.imageId,
+      });
+      return submission.reply();
+    case "chapter-description":
+      await Db.Chapter.update(params.chapterId, {
+        content: submission.value.description,
+      });
+      return submission.reply();
+    case "chapter-choice":
+      await Db.Choice.update(params.chapterId, {
+        content: submission.value.content,
+        toChapterId: submission.value.destination,
+      });
+      return submission.reply();
+    case "add-choice":
+      await Db.Choice.create(params.chapterId);
+      return submission.reply();
+    case "remove-choice":
+      await Db.Choice.delete(submission.value.id);
       return submission.reply();
     default:
       throw data("Invalid intent", { status: 400 });

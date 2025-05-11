@@ -38,24 +38,50 @@ model Chapter {
 model Choice {
   id            String  @id @default(cuid())
   content       String
+  order         Int     @default(0)
 
   chapter   Chapter @relation(name: "ChoicesFromChapter", fields: [chapterId], references: [id], onDelete: Cascade)
   chapterId String
   toChapter     Chapter? @relation(name: "ChoicesToChapter", fields: [toChapterId], references: [id], onDelete: Cascade)
   toChapterId   String?
 
-  @@unique([chapterId, toChapterId])
+  @@unique([chapterId, order])
+}
+
+
+enum ImageFormat {
+  JPEG
+  WEBP
+}
+
+enum ImageSize {
+  THUMB
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+
+model ImageVariant {
+  id        String        @id @default(cuid())
+  image     Image         @relation(fields: [imageId], references: [id])
+  imageId   String
+  format    ImageFormat
+  size      ImageSize
+  width     Int
+  height    Int
+  bytes     Bytes         
+  createdAt DateTime      @default(now())
+
+  @@unique([imageId, format, size]) // Prevents duplicate variants
 }
 
 model Image {
-  id     String @id @default(cuid())
-  source Bytes
-  webp   Bytes
-  png    Bytes
-
-  chapter Chapter? @relation("ChapterImage") 
-  story   Story?   @relation("StoryImage") 
-  user    User?    @relation("UserImage") 
+  id        String @id @default(cuid())
+  variants  ImageVariant[]  
+  chapter   Chapter? @relation("ChapterImage") 
+  story     Story?   @relation("StoryImage") 
+  user      User?    @relation("UserImage") 
 }
 
 model User {

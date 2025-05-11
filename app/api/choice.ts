@@ -1,4 +1,4 @@
-import type { Choice as ChoiceType } from "@prisma/client";
+import type { Choice as ChoiceType } from "~/generated/prisma";
 import { prisma } from "~/services/prisma.server";
 
 type UpdateChoiceArgs = Pick<ChoiceType, "content" | "toChapterId">;
@@ -21,7 +21,7 @@ export const Choice = Object.freeze({
     });
   },
 
-  update(id: string, data: UpdateChoiceArgs) {
+  update(id: string, data: Partial<UpdateChoiceArgs>) {
     return prisma.choice.update({
       where: { id },
       data,

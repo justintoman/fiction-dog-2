@@ -1,10 +1,10 @@
 import { invariant } from "@epic-web/invariant";
-import type { Password, Session, User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { redirect } from "react-router";
 import { Authenticator } from "remix-auth";
 import { FormStrategy } from "remix-auth-form";
 import { safeRedirect } from "remix-utils/safe-redirect";
+import type { Password, Session, User } from "~/generated/prisma";
 import { prisma } from "./prisma.server";
 import { authSessionStorage } from "./session.server";
 
