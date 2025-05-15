@@ -4,9 +4,8 @@ import type { Story as StoryType } from "~/generated/prisma";
 import { prisma } from "~/services/prisma.server";
 
 type CreateStoryArgs = Pick<StoryType, "authorId" | "imageId" | "title">;
-type UpdateStoryArgs = Partial<
-  Pick<StoryType, "imageId" | "title" | "isPublished">
->;
+type UpdateStoryArgs = Pick<StoryType, "slug"> &
+  Partial<Pick<StoryType, "imageId" | "title" | "isPublished">>;
 
 export const Story = Object.freeze({
   getAllPublished() {
@@ -62,7 +61,7 @@ export const Story = Object.freeze({
     return story;
   },
 
-  update(slug: string, data: UpdateStoryArgs) {
+  update({ slug, ...data }: UpdateStoryArgs) {
     return prisma.story.update({
       where: { slug },
       data,

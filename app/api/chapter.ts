@@ -2,7 +2,8 @@ import type { Chapter as ChapterType } from "~/generated/prisma";
 import { prisma } from "~/services/prisma.server";
 
 type CreateChapterArgs = Pick<ChapterType, "storySlug" | "imageId">;
-type UpdateChapterArgs = Partial<Pick<ChapterType, "content" | "imageId">>;
+type UpdateChapterArgs = Pick<ChapterType, "id"> &
+  Partial<Pick<ChapterType, "content" | "imageId">>;
 
 export const Chapter = Object.freeze({
   create(data: CreateChapterArgs) {
@@ -18,7 +19,7 @@ export const Chapter = Object.freeze({
     return prisma.chapter.findUnique({ where: { id } });
   },
 
-  update(id: string, data: UpdateChapterArgs) {
+  update({ id, ...data }: UpdateChapterArgs) {
     return prisma.chapter.update({ where: { id }, data });
   },
 

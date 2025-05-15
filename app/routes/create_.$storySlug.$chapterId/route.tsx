@@ -25,13 +25,17 @@ export default function StoryEditor({
   const fetchers = useFetchers();
   console.log(choices);
   const pendingChoices = fetchers
-    .filter((fetcher) => fetcher.formData?.get("intent") === "new-choice")
+    .filter(
+      (fetcher) =>
+        fetcher.formData?.get("intent") === "new-choice" ||
+        fetcher.formData?.get("intent") === "choice-order",
+    )
     .map((fetcher) => {
       const id = fetcher.formData?.get("id");
       const order = fetcher.formData?.get("order");
       invariant(typeof id === "string", "id is required");
       invariant(typeof order === "string", "order is required");
-      return { id, content: "", order: Number(order) };
+      return { id, order: Number(order) };
     });
 
   const removedChoices = fetchers
@@ -40,16 +44,6 @@ export default function StoryEditor({
       const id = fetcher.formData?.get("id");
       invariant(typeof id === "string", "id is required");
       return { id };
-    });
-
-  const reorderedChoices = fetchers
-    .filter((fetcher) => fetcher.formData?.get("intent") === "choice-order")
-    .map((fetcher) => {
-      const id = fetcher.formData?.get("id");
-      const order = fetcher.formData?.get("order");
-      invariant(typeof id === "string", "id is required");
-      invariant(typeof order === "string", "order is required");
-      return { id, order: Number(order) };
     });
 
   const mergedChoices: Choice[] = [];
@@ -62,14 +56,10 @@ export default function StoryEditor({
     const pendingChoice = pendingChoices.find(
       (pendingChoice) => pendingChoice.id === choice.id,
     );
-    const reorderedChoice = reorderedChoices.find(
-      (reorderedChoice) => reorderedChoice.id === choice.id,
-    );
-    if (pendingChoice || reorderedChoice) {
+    if (pendingChoice) {
       mergedChoices.push({
         ...choice,
         ...pendingChoice,
-        ...reorderedChoice,
       });
     } else {
       mergedChoices.push(choice);
@@ -87,32 +77,7 @@ export default function StoryEditor({
       mergedChoices.push(pendingChoice as Choice);
     }
   }
-  if (reorderedChoices.length > 0) {
-    for (const reorderedChoice of reorderedChoices) {
-      const choice = mergedChoices.find(
-        (choice) => choice.id === reorderedChoice.id,
-      );
-      if (choice) {
-        choice.order = reorderedChoice.order;
-      }
-    }
-    for (let i = 0; i < mergedChoices.length; i++) {
-      let choiceAtPosition = mergedChoices.find((c) => c.order === i);
 
-      if (!choiceAtPosition) {
-        choiceAtPosition = mergedChoices.reduce((prev, cur) => {
-          if (reorderedChoices.find((c) => c.id === cur.id)) {
-            return prev;
-          }
-          if (cur.order < prev.order && cur.order >= i) {
-            return cur;
-          }
-          return prev;
-        });
-        choiceAtPosition.order = i;
-      }
-    }
-  }
   mergedChoices.sort((a, b) => a.order - b.order);
 
   return (
@@ -133,8 +98,13 @@ export default function StoryEditor({
         <ChapterContentEditor description={chapter.content} />
       </div>
       <ul>
-        {mergedChoices.map((choice) => (
-          <ChoiceEditor key={choice.id} choice={choice} />
+        {mergedChoices.map((choice, index) => (
+          <ChoiceEditor
+            key={choice.id}
+            choice={choice}
+            previousOrder={mergedChoices[index - 1]?.order ?? 0}
+            nextOrder={mergedChoices[index + 1]?.order ?? choice.order + 1}
+          />
         ))}
       </ul>
       <div>
@@ -147,7 +117,7 @@ export default function StoryEditor({
               {
                 intent: "new-choice",
                 id: crypto.randomUUID(),
-                order: mergedChoices.length,
+                order: mergedChoices.length + 1,
               },
               {
                 navigate: false,
@@ -193,19 +163,22 @@ export async function action({ request, params }: Route.ActionArgs) {
   switch (submission.value.intent) {
     // story
     case "title":
-      await Db.Story.update(params.storySlug, {
+      await Db.Story.update({
+        slug: params.storySlug,
         title: submission.value.title,
       });
       return submission.reply();
 
     // chapers
     case "chapter-image":
-      await Db.Chapter.update(params.chapterId, {
+      await Db.Chapter.update({
+        id: params.chapterId,
         imageId: submission.value.imageId,
       });
       return submission.reply();
     case "chapter-description":
-      await Db.Chapter.update(params.chapterId, {
+      await Db.Chapter.update({
+        id: params.chapterId,
         content: submission.value.description,
       });
       return submission.reply();
@@ -219,19 +192,20 @@ export async function action({ request, params }: Route.ActionArgs) {
       });
       return submission.reply();
     case "choice-content":
-      await Db.Choice.update(submission.value.id, {
+      await Db.Choice.update({
+        id: submission.value.id,
         content: submission.value.content,
       });
       return submission.reply();
     case "choice-order":
-      await Db.Choice.reorder(
-        params.chapterId,
-        submission.value.id,
-        submission.value.order,
-      );
+      await Db.Choice.update({
+        id: submission.value.id,
+        order: submission.value.order,
+      });
       return submission.reply();
     case "choice-target":
-      await Db.Choice.update(submission.value.id, {
+      await Db.Choice.update({
+        id: submission.value.id,
         toChapterId: submission.value.toChapterId,
       });
       return submission.reply();
@@ -242,22 +216,6 @@ export async function action({ request, params }: Route.ActionArgs) {
     default:
       throw data("Invalid intent", { status: 400 });
   }
-}
-
-export async function clientAction({
-  request,
-  serverAction,
-}: Route.ClientActionArgs) {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      serverAction().then(resolve).catch(reject);
-    }, 1000);
-
-    request.signal.addEventListener("abort", () => {
-      clearTimeout(timeoutId);
-      reject(new Error("Request aborted"));
-    });
-  });
 }
 
 export const meta: Route.MetaFunction = ({ data }) => [

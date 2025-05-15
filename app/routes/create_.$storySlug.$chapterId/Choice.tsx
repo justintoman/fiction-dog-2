@@ -7,7 +7,7 @@ import { useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { invariant } from "@epic-web/invariant";
 import { useState } from "react";
-import { useFetcher, useSubmit } from "react-router";
+import { useFetcher, useParams, useSubmit } from "react-router";
 import { ErrorList } from "~/components/ErrorsList";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -17,11 +17,18 @@ import { ChoiceContentSchema } from "./schemas";
 
 type ChoiceProps = {
   choice: Choice;
+  previousOrder: number;
+  nextOrder: number;
 };
 
-export function ChoiceEditor({ choice }: ChoiceProps) {
+export function ChoiceEditor({
+  choice,
+  previousOrder,
+  nextOrder,
+}: ChoiceProps) {
   const fetcher = useFetcher();
   const submit = useSubmit();
+  const { storySlug, chapterSlug } = useParams();
   const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">(
     "none",
   );
@@ -62,23 +69,19 @@ export function ChoiceEditor({ choice }: ChoiceProps) {
         const transfer = JSON.parse(event.dataTransfer.getData("choice"));
         invariant(transfer.id, "missing choice id");
         invariant(transfer.order != null, "missing choice order");
-        const droppedOrder =
-          acceptDrop === "top"
-            ? transfer.order < choice.order
-              ? choice.order - 1
-              : choice.order
-            : transfer.order > choice.order
-              ? choice.order + 1
-              : choice.order;
+        const droppedOrder = acceptDrop === "top" ? previousOrder : nextOrder;
+        const moveOrder = (droppedOrder + choice.order) / 2;
         const payload = {
           intent: "choice-order",
           id: transfer.id,
-          order: droppedOrder,
+          order: moveOrder,
         };
         console.log("payload", payload);
         submit(payload, {
           method: "post",
           navigate: false,
+          flushSync: true,
+          fetcherKey: `choice-order:${choice.id}`,
         });
 
         setAcceptDrop("none");
@@ -106,7 +109,15 @@ export function ChoiceEditor({ choice }: ChoiceProps) {
             placeholder="Choice"
             {...getInputProps(fields.content, { type: "text" })}
             onChange={(e) => {
-              fetcher.submit(e.currentTarget.form, { method: "post" });
+              fetcher.submit(e.currentTarget.form, {
+                method: "post",
+                action: `/create/${storySlug}/${chapterSlug}/d`,
+              });
+            }}
+            onBlur={(e) => {
+              fetcher.submit(e.currentTarget.form, {
+                method: "post",
+              });
             }}
           />
           <ErrorList

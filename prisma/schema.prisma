@@ -38,15 +38,14 @@ model Chapter {
 model Choice {
   id            String  @id @default(cuid())
   content       String
-  order         Int     @default(0)
+  order         Float  
 
   chapter   Chapter @relation(name: "ChoicesFromChapter", fields: [chapterId], references: [id], onDelete: Cascade)
   chapterId String
   toChapter     Chapter? @relation(name: "ChoicesToChapter", fields: [toChapterId], references: [id], onDelete: Cascade)
   toChapterId   String?
 
-  // TODO: figure out how to make this unique
-  // @@unique([chapterId, order])
+  @@unique([chapterId, order])
 }
 
 
