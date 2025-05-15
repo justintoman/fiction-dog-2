@@ -6,6 +6,7 @@ import { Bing } from "~/api/bing";
 import { ErrorList } from "~/components/ErrorsList";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import type { Route } from "./+types/route";
 
@@ -18,6 +19,22 @@ export function loader({ request }: Route.LoaderArgs) {
   }
   const results = Bing.imageSearch(query || "");
   return results;
+}
+
+export async function clientLoader({
+  request,
+  serverLoader,
+}: Route.ClientLoaderArgs) {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      serverLoader().then(resolve).catch(reject);
+    }, 500);
+
+    request.signal.addEventListener("abort", () => {
+      clearTimeout(timeoutId);
+      reject(new Error("Request aborted"));
+    });
+  });
 }
 
 type ImageSearchProps = {
@@ -45,7 +62,18 @@ export function ImagePicker({ config }: ImageSearchProps) {
           >
             <ArrowLeft />
           </Button>
-          <Input type="search" name="q" placeholder="Search..." />
+          <Label className="sr-only" htmlFor="image-search">
+            Search for an image
+          </Label>
+          <Input
+            id="image-search"
+            type="search"
+            name="q"
+            placeholder="Search for an image"
+            onChange={(e) =>
+              fetcher.submit(e.currentTarget.form, { method: "get" })
+            }
+          />
           <Button type="submit" size="icon" variant="outline">
             <Search />
           </Button>

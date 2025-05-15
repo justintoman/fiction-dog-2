@@ -27,10 +27,14 @@ export function ChapterContentEditor({ description }: { description: string }) {
       className="w-full space-y-2 p-2"
     >
       <input name="intent" value="chapter-description" type="hidden" />
-      <Label className="text-xs" htmlFor={fields.description.id}>
+      <Label className="sr-only" htmlFor={fields.description.id}>
         Chapter Content
       </Label>
-      <Textarea {...getTextareaProps(fields.description)} rows={10} />
+      <Textarea
+        placeholder="Chapter description"
+        {...getTextareaProps(fields.description)}
+        rows={10}
+      />
       <ErrorList errors={form.errors} id={fields.description.errorId} />
     </fetcher.Form>
   );

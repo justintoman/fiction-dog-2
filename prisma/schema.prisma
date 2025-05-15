@@ -45,7 +45,8 @@ model Choice {
   toChapter     Chapter? @relation(name: "ChoicesToChapter", fields: [toChapterId], references: [id], onDelete: Cascade)
   toChapterId   String?
 
-  @@unique([chapterId, order])
+  // TODO: figure out how to make this unique
+  // @@unique([chapterId, order])
 }
 
 

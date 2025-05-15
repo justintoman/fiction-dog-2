@@ -12,17 +12,31 @@ export const ChapterImageSchema = z.object({
 
 export const ChapterDescriptionSchema = z.object({
   intent: z.literal("chapter-description"),
-  description: z.string().min(1),
+  description: z.string(),
 });
 
-export const ChoiceSchema = z.object({
-  intent: z.literal("chapter-choice"),
+export const NewChoiceSchema = z.object({
+  intent: z.literal("new-choice"),
+  id: z.string(),
+  order: z.number(),
+});
+
+export const ChoiceOrderSchema = z.object({
+  intent: z.literal("choice-order"),
+  id: z.string(),
+  order: z.number(),
+});
+
+export const ChoiceContentSchema = z.object({
+  intent: z.literal("choice-content"),
+  id: z.string(),
   content: z.string(),
-  destination: z.string().optional(),
 });
 
-export const AddChoiceSchema = z.object({
-  intent: z.literal("add-choice"),
+export const ChoiceTargetSchema = z.object({
+  intent: z.literal("choice-target"),
+  id: z.string(),
+  toChapterId: z.string(),
 });
 
 export const RemoveChoiceSchema = z.object({
@@ -34,7 +48,9 @@ export const StoryEditorSchema = z.discriminatedUnion("intent", [
   TitleSchema,
   ChapterImageSchema,
   ChapterDescriptionSchema,
-  ChoiceSchema,
-  AddChoiceSchema,
+  NewChoiceSchema,
   RemoveChoiceSchema,
+  ChoiceOrderSchema,
+  ChoiceContentSchema,
+  ChoiceTargetSchema,
 ]);
