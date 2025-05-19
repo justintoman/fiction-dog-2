@@ -8,7 +8,7 @@ import { ChapterDescriptionSchema } from "./schemas";
 
 export function ChapterContentEditor({ description }: { description: string }) {
   const fetcher = useFetcher();
-  const { storySlug, chapterSlug } = useParams();
+  const { storySlug, chapterId } = useParams();
   const [form, fields] = useForm({
     defaultValue: {
       description,
@@ -38,7 +38,7 @@ export function ChapterContentEditor({ description }: { description: string }) {
         onChange={(e) => {
           fetcher.submit(e.currentTarget.form, {
             method: "post",
-            action: `/create/${storySlug}/${chapterSlug}/d`,
+            action: `/create/${storySlug}/${chapterId}/d`,
           });
         }}
         onBlur={(e) => {

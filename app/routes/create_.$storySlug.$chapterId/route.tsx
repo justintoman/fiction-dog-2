@@ -1,87 +1,23 @@
 import { parseWithZod } from "@conform-to/zod";
-import { invariant } from "@epic-web/invariant";
-import {
-  data,
-  isRouteErrorResponse,
-  useFetchers,
-  useSubmit,
-} from "react-router";
+import { data, isRouteErrorResponse } from "react-router";
 import { Db } from "~/api/db.server";
-import { Button } from "~/components/ui/button";
-import type { Choice } from "~/generated/prisma";
 import { verifyStoryForEditing } from "~/lib/story-utils";
-import { ChoiceEditor } from "~/routes/create_.$storySlug.$chapterId/Choice";
 import { Image } from "~/routes/image.$id.$format.$size/route";
 import type { Route } from "./+types/route";
 import { ChapterContentEditor } from "./ChapterContentEditor";
 import { ChapterImagePicker } from "./ChapterImagePicker";
+import { ChoiceEditor } from "./ChoiceEditor";
+import { NewChoiceButton } from "./NewChoiceButton";
 import { StoryEditorSchema } from "./schemas";
 import { StoryTitleEditor } from "./TitleEditor";
-
+import { usePendingChoices } from "./usePendingChoices";
 export default function StoryEditor({
   loaderData: { story, chapter, choices },
 }: Route.ComponentProps) {
-  const submit = useSubmit();
-  const fetchers = useFetchers();
-  console.log(choices);
-  const pendingChoices = fetchers
-    .filter(
-      (fetcher) =>
-        fetcher.formData?.get("intent") === "new-choice" ||
-        fetcher.formData?.get("intent") === "choice-order",
-    )
-    .map((fetcher) => {
-      const id = fetcher.formData?.get("id");
-      const order = fetcher.formData?.get("order");
-      invariant(typeof id === "string", "id is required");
-      invariant(typeof order === "string", "order is required");
-      return { id, order: Number(order) };
-    });
-
-  const removedChoices = fetchers
-    .filter((fetcher) => fetcher.formData?.get("intent") === "remove-choice")
-    .map((fetcher) => {
-      const id = fetcher.formData?.get("id");
-      invariant(typeof id === "string", "id is required");
-      return { id };
-    });
-
-  const mergedChoices: Choice[] = [];
-  for (const choice of choices) {
-    if (
-      removedChoices.find((removedChoice) => removedChoice.id === choice.id)
-    ) {
-      continue;
-    }
-    const pendingChoice = pendingChoices.find(
-      (pendingChoice) => pendingChoice.id === choice.id,
-    );
-    if (pendingChoice) {
-      mergedChoices.push({
-        ...choice,
-        ...pendingChoice,
-      });
-    } else {
-      mergedChoices.push(choice);
-    }
-  }
-  for (const pendingChoice of pendingChoices) {
-    if (
-      removedChoices.find(
-        (removedChoice) => removedChoice.id === pendingChoice.id,
-      )
-    ) {
-      continue;
-    }
-    if (!mergedChoices.find((choice) => choice.id === pendingChoice.id)) {
-      mergedChoices.push(pendingChoice as Choice);
-    }
-  }
-
-  mergedChoices.sort((a, b) => a.order - b.order);
+  const mergedChoices = usePendingChoices(choices);
 
   return (
-    <div className="mx-auto max-w-md space-y-4">
+    <div>
       <div className="flex min-h-0 items-start">
         <Image
           imageId={story.imageId}
@@ -91,43 +27,28 @@ export default function StoryEditor({
           <StoryTitleEditor title={story.title} />
         </div>
       </div>
-      <div>
-        <ChapterImagePicker imageId={chapter.imageId} />
-      </div>
-      <div>
-        <ChapterContentEditor description={chapter.content} />
-      </div>
-      <ul>
-        {mergedChoices.map((choice, index) => (
-          <ChoiceEditor
-            key={choice.id}
-            choice={choice}
-            previousOrder={mergedChoices[index - 1]?.order ?? 0}
-            nextOrder={mergedChoices[index + 1]?.order ?? choice.order + 1}
-          />
-        ))}
-      </ul>
-      <div>
-        <Button
-          type="submit"
-          name="intent"
-          value="new-choice"
-          onClick={() => {
-            submit(
-              {
-                intent: "new-choice",
-                id: crypto.randomUUID(),
-                order: mergedChoices.length + 1,
-              },
-              {
-                navigate: false,
-                method: "post",
-              },
-            );
-          }}
-        >
-          Add Choice
-        </Button>
+      <div className="flex gap-4">
+        <div>
+          <ChapterImagePicker imageId={chapter.imageId} />
+          <ChapterContentEditor description={chapter.content} />
+        </div>
+        <div className="mt-8">
+          <ul className="space-y-2">
+            {mergedChoices.map((choice, index) => (
+              <ChoiceEditor
+                key={choice.id}
+                choice={choice}
+                previousOrder={
+                  mergedChoices[index - 1]?.order ?? choice.order - 1
+                }
+                nextOrder={mergedChoices[index + 1]?.order ?? choice.order + 1}
+              />
+            ))}
+          </ul>
+          <div className="mt-4">
+            <NewChoiceButton choiceCount={mergedChoices.length} />
+          </div>
+        </div>
       </div>
     </div>
   );

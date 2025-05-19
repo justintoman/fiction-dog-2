@@ -53,6 +53,9 @@ export function ImagePicker({ config }: ImageSearchProps) {
           method="get"
           action="/images"
           className="my-2 flex w-full items-center space-x-2 px-2 sm:p-0"
+          onSubmit={(e) => {
+            e.stopPropagation();
+          }}
         >
           <Button
             size="icon"

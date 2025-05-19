@@ -6,8 +6,9 @@ import {
 import { useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { invariant } from "@epic-web/invariant";
+import { GripVertical } from "lucide-react";
 import { useState } from "react";
-import { useFetcher, useParams, useSubmit } from "react-router";
+import { Form, useParams, useSubmit } from "react-router";
 import { ErrorList } from "~/components/ErrorsList";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -16,7 +17,7 @@ import { cn } from "~/lib/utils";
 import { ChoiceContentSchema } from "./schemas";
 
 type ChoiceProps = {
-  choice: Choice;
+  choice: Omit<Choice, "chapterId">;
   previousOrder: number;
   nextOrder: number;
 };
@@ -26,9 +27,8 @@ export function ChoiceEditor({
   previousOrder,
   nextOrder,
 }: ChoiceProps) {
-  const fetcher = useFetcher();
   const submit = useSubmit();
-  const { storySlug, chapterSlug } = useParams();
+  const { storySlug, chapterId } = useParams();
   const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">(
     "none",
   );
@@ -69,54 +69,82 @@ export function ChoiceEditor({
         const transfer = JSON.parse(event.dataTransfer.getData("choice"));
         invariant(transfer.id, "missing choice id");
         invariant(transfer.order != null, "missing choice order");
+        invariant(
+          transfer.toChapterId !== undefined,
+          "missing choice toChapterId",
+        );
+        invariant(transfer.content != null, "missing choice content");
         const droppedOrder = acceptDrop === "top" ? previousOrder : nextOrder;
         const moveOrder = (droppedOrder + choice.order) / 2;
-        const payload = {
-          intent: "choice-order",
-          id: transfer.id,
-          order: moveOrder,
-        };
-        console.log("payload", payload);
-        submit(payload, {
-          method: "post",
-          navigate: false,
-          flushSync: true,
-          fetcherKey: `choice-order:${choice.id}`,
-        });
+
+        submit(
+          {
+            intent: "choice-order",
+            id: transfer.id,
+            order: moveOrder,
+            content: transfer.content,
+            toChapterId: transfer.toChapterId,
+          },
+          {
+            method: "post",
+            navigate: false,
+            flushSync: true,
+            fetcherKey: `choice:${transfer.id}`,
+          },
+        );
 
         setAcceptDrop("none");
       }}
     >
-      {choice.order}
       <div
+        className="flex items-center gap-2"
         draggable
         onDragStart={(event) => {
           event.dataTransfer.effectAllowed = "move";
           event.dataTransfer.setData(
             "choice",
-            JSON.stringify({ id: choice.id, order: choice.order }),
+            JSON.stringify({
+              id: choice.id,
+              order: choice.order,
+              content: choice.content,
+              toChapterId: choice.toChapterId,
+            }),
           );
         }}
       >
-        <fetcher.Form
-          method="post"
-          {...getFormProps(form)}
-          className="w-full p-1"
-        >
+        <GripVertical className="size-4 cursor-pointer" />
+        <Form method="post" {...getFormProps(form)} className="w-full p-1">
           <input name="intent" value="choice-content" type="hidden" />
           <input name="id" value={choice.id} type="hidden" />
+          <input name="order" value={choice.order} type="hidden" />
           <Input
             placeholder="Choice"
             {...getInputProps(fields.content, { type: "text" })}
             onChange={(e) => {
-              fetcher.submit(e.currentTarget.form, {
+              const formData = new FormData(e.currentTarget.form!);
+              formData.set("intent", "choice-content");
+              formData.set("id", choice.id);
+              formData.set("order", choice.order.toString());
+              if (choice.toChapterId) {
+                formData.set("toChapterId", choice.toChapterId);
+              }
+              submit(formData, {
                 method: "post",
-                action: `/create/${storySlug}/${chapterSlug}/d`,
+                action: `/create/${storySlug}/${chapterId}/d`,
+                fetcherKey: `choice:${choice.id}`,
               });
             }}
             onBlur={(e) => {
-              fetcher.submit(e.currentTarget.form, {
+              const formData = new FormData(e.currentTarget.form!);
+              formData.set("intent", "choice-content");
+              formData.set("id", choice.id);
+              formData.set("order", choice.order.toString());
+              if (choice.toChapterId) {
+                formData.set("toChapterId", choice.toChapterId);
+              }
+              submit(formData, {
                 method: "post",
+                fetcherKey: `choice:${choice.id}`,
               });
             }}
           />
@@ -124,7 +152,7 @@ export function ChoiceEditor({
             errors={fields.content.errors}
             id={fields.content.errorId}
           />
-        </fetcher.Form>
+        </Form>
       </div>
       <Button
         type="button"
@@ -135,6 +163,7 @@ export function ChoiceEditor({
             {
               navigate: false,
               method: "post",
+              fetcherKey: `choice:${choice.id}`,
             },
           );
         }}
